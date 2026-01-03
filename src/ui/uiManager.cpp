@@ -17,7 +17,7 @@ void uiSetup()
     drawStatusBar(ConnexionStatus::DISCONNECTED, ConnexionStatus::CONNECTED, ConnexionStatus::PENDING);
 
     Serial.println("------------------- UI entering state");
-    states[currentStateIndex]->enter();
+    states[currentStateIndex]->enter(StateIndex::Same);
     Serial.println("------------------- UI state entered");
 }
 
@@ -30,13 +30,14 @@ void uiLoop()
         states[currentStateIndex]->checkIfElementPressed(t);
     }
     // update various elements
-    if (StateIndex idx = states[currentStateIndex]->update(); idx != StateIndex::Same)
+    StateIndex idx = states[currentStateIndex]->update();
+    if (idx != StateIndex::Same)
     {
         int oldState = currentStateIndex;
         currentStateIndex = index(idx);
         states[oldState]->exit(states[currentStateIndex]);
         M5.Display.fillScreen(BG_COLOR);
         drawStatusBar(ConnexionStatus::CONNECTED, ConnexionStatus::CONNECTED, ConnexionStatus::DISCONNECTED);
-        states[currentStateIndex]->enter();
+        states[currentStateIndex]->enter(indexToState(oldState));
     }
 }

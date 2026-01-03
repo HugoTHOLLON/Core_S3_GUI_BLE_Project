@@ -12,16 +12,28 @@ enum class StateIndex
     PopupConf = 1, // Popup Confirmation
     PopupYesNo = 2,
     App = 3,
+
+    COUNT // no values because it is used to calculate how many states there are
 };
 
 inline int index(StateIndex s) { return static_cast<int>(s); }
+inline StateIndex indexToState(int i) { return (i >= 0 && i < static_cast<int>(StateIndex::COUNT)) ? static_cast<StateIndex>(i) : StateIndex::Same; }
 
 class State
 {
-private:
+protected:
+    // all of the buttons used by the state
+    // /!\ the order in which the buttons are added matters: in case of a click if 2 buttons are
+    // overlapping, the one with the smallest index will be chosen first/!\.
+    Button *buttons[10];
+    int buttonCount;
     StateIndex index;
 
+    void addButton(Button *btn);
+    void clearButtons();
+
 public:
+    State();
     virtual void enter(StateIndex previousState);
     virtual void exit(State *nextState);
     virtual void checkIfElementPressed(m5::touch_detail_t clickDetails);
@@ -63,8 +75,6 @@ public:
     StateMenu();
     void enter(StateIndex previousState) override;
     void exit(State *nextState) override;
-    void checkIfElementPressed(m5::touch_detail_t clickDetails) override;
-    StateIndex update() override;
 };
 
 class StateApp : public State
