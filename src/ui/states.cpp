@@ -72,7 +72,10 @@ StateIndex State::update()
 {
     // if the index is not Same it means the State must change next loop for the new State in the index
     if (index != StateIndex::Same)
+    {
+        Serial.println("Index is different");
         return index;
+    }
 
     // Update all buttons
     for (int i = 0; i < buttonCount; i++)
@@ -96,6 +99,7 @@ StatePopup::StatePopup()
     : buttonNo(45, 180, 90, 30, "No", 1.5),
       buttonYes(180, 180, 90, 30, "Yes", 1.5)
 {
+    stateType = StateIndex::Popup;
 }
 
 void StatePopup::enter(StateIndex previousState)
@@ -144,21 +148,52 @@ StateMenu::StateMenu()
     : buttonPrevious(15, 185, 130, 40, "Previous"),
       buttonNext(170, 185, 130, 40, "Next")
 {
+    stateType = StateIndex::Menu;
 }
 
 void StateMenu::enter(StateIndex previousState)
 {
+    // setup buttons
     this->addButton(&buttonPrevious);
     this->addButton(&buttonNext);
+    if (!onBtnNextPressHdl.isValid())
+        onBtnNextPressHdl = buttonNext.onPressed.connect([this]()
+                                                         { onButtonNextPressed(); });
+    if (!onBtnPreviousHdl.isValid())
+        onBtnPreviousHdl = buttonPrevious.onPressed.connect([this]()
+                                                            { onButtonPreviousPressed(); });
     // call parent enter() which set the index to Same and reset and draw the buttons
     State::enter(previousState);
 }
 
 void StateMenu::exit(State *nextState)
 {
+    // Pass informations to popup
+    switch (nextState->getStateType())
+    {
+    case StateIndex::Popup:
+        // It IS a StatePopup - you can access popup-specific members
+        StatePopup *popup = static_cast<StatePopup *>(nextState);
+        popup->type = StatePopup::YesOrNo;
+        popup->title = "Confirm Exit";
+        popup->msg = "Are you sure?";
+        break;
+    }
+
+    // disconnect handles
+    onBtnNextPressHdl.disconnect();
+    onBtnPreviousHdl.disconnect();
+
     // call parent exit() which reset, disable and clear all buttons
     State::exit(nextState);
-    // TODO pass things to next state if needed
+}
+
+void StateMenu::onButtonNextPressed()
+{
+}
+
+void StateMenu::onButtonPreviousPressed()
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

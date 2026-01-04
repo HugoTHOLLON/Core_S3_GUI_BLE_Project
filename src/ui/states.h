@@ -4,14 +4,14 @@
 #include <M5Unified.h>
 #include "ui/constants.h"
 #include "elements.h"
+#include "utils/events.h"
 
 enum class StateIndex
 {
     Same = -1, // for the update return, when no state change is asked
     Menu = 0,
-    PopupConf = 1, // Popup Confirmation
-    PopupYesNo = 2,
-    App = 3,
+    Popup = 1,
+    App = 2,
 
     COUNT // no values because it is used to calculate how many states there are
 };
@@ -26,11 +26,14 @@ protected:
     // /!\ the order in which the buttons are added matters: in case of a click if 2 buttons are
     // overlapping, the one with the smallest index will be chosen first/!\.
     Button *buttons[10];
+    Signal<>::Handle *btnsPressedHandle[10];
     int buttonCount;
     StateIndex index;
 
     void addButton(Button *btn);
     void clearButtons();
+
+    StateIndex stateType;
 
 public:
     State();
@@ -38,6 +41,7 @@ public:
     virtual void exit(State *nextState);
     virtual void checkIfElementPressed(m5::touch_detail_t clickDetails);
     virtual StateIndex update();
+    StateIndex getStateType() const { return stateType; }
     // Virtual destructor for polymorphic base class
     virtual ~State() = default;
 };
@@ -69,7 +73,10 @@ class StateMenu : public State
 private:
     Button buttonNext;
     Button buttonPrevious;
-    StateIndex index;
+    Signal<>::Handle onBtnNextPressHdl;
+    Signal<>::Handle onBtnPreviousHdl;
+    void onButtonNextPressed();
+    void onButtonPreviousPressed();
 
 public:
     StateMenu();

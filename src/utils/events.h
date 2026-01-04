@@ -8,62 +8,75 @@ template <typename... Args>
 class Signal
 {
 private:
-    std::vector<std::function<void(Args...)>> callbacks;
-    bool funcAreEqual(std::function<Args...> func1, std::function<Args...> func2)
+    struct connexion
     {
-        // Compare types and actual function pointers
-        return func1.target_type() == func2.target_type() &&
-               func1.template target<void (*)(Args...)>() ==
-                   func2.template target<void (*)(Args...)>()
-    }
+        size_t id;
+        std::function<void(Args...)> callback;
+    };
+
+    std::vector<connexion> connexions;
+    size_t nextId = 0;
 
 public:
-    void connect(std::function<Args...> func)
+    // connexion handle that can be used to disconnect
+    class Handle
     {
-        if (!isConnected(func))
-            callbacks.push_back(func);
-    }
+    private:
+        size_t id;
+        Signal *signal;
+        friend class Signal;
 
-    bool isConnected(std::function<Args...> func)
-    {
-        for (const auto &callback : callbacks)
+    public:
+        Handle() : id(0), signal(nullptr) {}
+        Handle(size_t id, Signal *sig) : id(id), signal(sig) {}
+
+        // Disconnect this specific connexion
+        void disconnect()
         {
-            if (funcAreEqual(callback, func))
-                return true;
-        }
-        return false;
-    }
-
-    bool hasConnexions() const
-    {
-        return !callbacks.empty();
-    }
-
-    void emit(Args... args)
-    {
-        for (auto &callback : callbacks)
-        {
-            if (callback)
-                callback(args...);
-        }
-    }
-
-    bool disconnect(std::function<Args...> func)
-    {
-        for (size_t i = 0; i < callbacks.size(); i++)
-        {
-            if (funcAreEqual(callbacks[i], func))
+            if (signal)
             {
-                callbacks.erase(callbacks.begin() + i);
-                return true;
+                signal->disconnectById(id);
+                signal = nullptr;
             }
         }
-        return false;
+
+        bool isValid() const { return signal != nullptr; }
+    };
+
+    Handle connect(std::function<void(Args...)> func)
+    {
+        size_t id = nextId++;
+        connexions.push_back({id, func});
+        return Handle(id, this);
+    }
+
+    void disconnectById(size_t id)
+    {
+        for (auto it = connexions.begin(); it != connexions.end(); ++it)
+        {
+            if (it->id == id)
+            {
+                connexions.erase(it);
+                return;
+            }
+        }
     }
 
     void disconnectAll()
     {
-        callbacks.clear();
+        connexions.clear();
+    }
+
+    void emit(Args... args)
+    {
+        for (auto &conn : connexions)
+        {
+            if (conn.callback)
+            {
+                conn.callback(args...);
+            }
+        }
+        Serial.println("Signal emitted");
     }
 };
 

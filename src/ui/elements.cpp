@@ -39,6 +39,7 @@ bool Button::pressButton()
         this->pressed = true;
         this->pressedTime = millis();
         this->draw();
+        this->onPressed.emit();
         return true;
     }
     return false;

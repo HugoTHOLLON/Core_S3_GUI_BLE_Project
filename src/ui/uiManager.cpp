@@ -8,8 +8,7 @@ void uiSetup()
 {
     Serial.println("------------------- UI Setup started");
     states[index(StateIndex::Menu)] = new StateMenu();
-    states[index(StateIndex::PopupConf)] = new StatePopup();
-    states[index(StateIndex::PopupYesNo)] = new StatePopup();
+    states[index(StateIndex::Popup)] = new StatePopup();
     states[index(StateIndex::App)] = new StateApp();
     currentStateIndex = index(StateIndex::Menu);
 
@@ -33,6 +32,7 @@ void uiLoop()
     StateIndex idx = states[currentStateIndex]->update();
     if (idx != StateIndex::Same)
     {
+        Serial.println("StateIndex different - Changing state");
         int oldState = currentStateIndex;
         currentStateIndex = index(idx);
         states[oldState]->exit(states[currentStateIndex]);

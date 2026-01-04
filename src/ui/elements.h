@@ -3,6 +3,7 @@
 
 #include <M5Unified.h>
 #include "ui/constants.h"
+#include "utils/events.h"
 
 class ClickableArea
 {
@@ -27,6 +28,7 @@ private:
 public:
     const char *label;
     float labelSize;
+    Signal<> onPressed;
 
     Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label);
     Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label, float lblSize);
