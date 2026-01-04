@@ -18,11 +18,17 @@ bool ClickableArea::isInsideArea(int32_t x, int32_t y)
 void ClickableArea::update() {}
 
 Button::Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label)
+    : Button(x, y, width, height, label, 1.7)
+{
+}
+
+Button::Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label, float lblSize)
     : ClickableArea(x, y, width, height)
 {
     clickable = true;
     pressed = false;
     this->label = label;
+    this->labelSize = lblSize;
 }
 
 bool Button::pressButton()
@@ -64,7 +70,7 @@ void Button::draw()
 
     textdatum_t previousDatum = M5.Display.getTextDatum();
     M5.Display.setTextDatum(MC_DATUM);
-    M5.Display.setTextSize(1.7);
+    M5.Display.setTextSize(this->labelSize);
     M5.Display.setTextColor(TEXT_COLOR);
     M5.Display.drawString(label, fgX + (width / 2), fgY + (height / 2));
 

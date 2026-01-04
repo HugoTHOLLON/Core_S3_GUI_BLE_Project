@@ -93,8 +93,8 @@ StateIndex State::update()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StatePopup::StatePopup()
-    : buttonNo(45, 180, 90, 40, "No"),
-      buttonYes(180, 180, 90, 40, "Yes")
+    : buttonNo(45, 180, 90, 30, "No", 1.5),
+      buttonYes(180, 180, 90, 30, "Yes", 1.5)
 {
 }
 
@@ -105,8 +105,10 @@ void StatePopup::enter(StateIndex previousState)
     int32_t width = M5.Display.width() - 20;
     int32_t height = M5.Display.height() - 20 - statusBarHeight;
     int32_t y = statusBarHeight + 10;
+
     M5.Display.fillRect(7, y - 3, width + 6, height + 6, BUTTON_BG_COLOR);
     M5.Display.fillRect(10, y, width, height, BG_COLOR);
+
     int32_t textX = M5.Display.width() / 2;
     M5.Display.setTextSize(2);
     M5.Display.drawCenterString(this->title, textX, y + 10);

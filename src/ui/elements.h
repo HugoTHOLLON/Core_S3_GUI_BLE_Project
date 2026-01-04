@@ -26,8 +26,10 @@ private:
 
 public:
     const char *label;
+    float labelSize;
 
     Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label);
+    Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label, float lblSize);
     bool pressButton();
     bool isPressed() const;
     bool isClickable() const;
