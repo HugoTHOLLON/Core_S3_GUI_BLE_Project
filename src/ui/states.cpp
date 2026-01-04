@@ -93,18 +93,31 @@ StateIndex State::update()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StatePopup::StatePopup()
-    : buttonNo(55, 165, 90, 40, "No"),
-      buttonYes(170, 165, 90, 40, "Yes")
+    : buttonNo(45, 180, 90, 40, "No"),
+      buttonYes(180, 180, 90, 40, "Yes")
 {
 }
 
 void StatePopup::enter(StateIndex previousState)
 {
     this->previousState = previousState;
+    // drawing state borders
+    int32_t width = M5.Display.width() - 20;
+    int32_t height = M5.Display.height() - 20 - statusBarHeight;
+    int32_t y = statusBarHeight + 10;
+    M5.Display.fillRect(7, y - 3, width + 6, height + 6, BUTTON_BG_COLOR);
+    M5.Display.fillRect(10, y, width, height, BG_COLOR);
+    int32_t textX = M5.Display.width() / 2;
+    M5.Display.setTextSize(2);
+    M5.Display.drawCenterString(this->title, textX, y + 10);
+    int32_t msgY = y + M5.Display.fontHeight() + 20;
+    M5.Display.setTextSize(1.6);
+    M5.Display.drawCenterString(this->msg, textX, msgY);
+    // button setup
     switch (this->type)
     {
     case YesOrNo:
-        buttonYes.x = 170;
+        buttonYes.x = 180;
         this->addButton(&buttonYes);
         this->addButton(&buttonNo);
         break;
