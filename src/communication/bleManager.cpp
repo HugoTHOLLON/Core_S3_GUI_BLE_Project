@@ -11,11 +11,16 @@
 NimBLEServer *pServer = nullptr;
 int32_t cursorX = 0;
 int32_t cursorY = 0;
-
-void printMS(const char *msg)
+Signal<ConnexionStatus> bleConnStatusUpdated;
+ConnexionStatus bleStatus = ConnexionStatus::DISCONNECTED;
+void setBleConnexionStatus(ConnexionStatus sts)
 {
-    M5.Display.println(msg);
-    Serial.println(msg);
+    bleStatus = sts;
+    bleConnStatusUpdated.emit(sts);
+}
+ConnexionStatus getBleConnexionStatus()
+{
+    return bleStatus;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -30,15 +35,30 @@ class ServerCallbacks : public NimBLEServerCallbacks
 {
     void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo) override
     {
-        printMS("Client connected");
+        // Check if there is already a connexion to limit it to 1
+        if (pServer->getConnectedCount() > 1)
+        {
+            pServer->disconnect(connInfo.getConnHandle());
+            return;
+        }
+        Serial.println("Client connected");
+
+        // Stop advertising to prevent additional connexions
+        NimBLEDevice::getAdvertising()->stop();
 
         pServer->updateConnParams(connInfo.getConnHandle(), 24, 48, 0, 180);
+        setBleConnexionStatus(ConnexionStatus::CONNECTED);
     }
 
     void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason) override
     {
-        printMS("Client disconnected - start advertising");
-        NimBLEDevice::startAdvertising();
+        // Only restart advertising if no connexions remain
+        if (pServer->getConnectedCount() == 0)
+        {
+            Serial.println("Client disconnected - start advertising");
+            NimBLEDevice::startAdvertising();
+            setBleConnexionStatus(ConnexionStatus::DISCONNECTED);
+        }
     }
 } serverCallbacks;
 
@@ -111,7 +131,7 @@ boolean deviceConnected()
 
 void initBLE()
 {
-    printMS("Setting up BLE");
+    Serial.println("Setting up BLE");
     // initialize the library to prepare the NimBLE stack to be ready for commands
     NimBLEDevice::init(BLE_DEVICE_NAME);
     // define the device as a server (peripheral) and set callbacks
@@ -126,19 +146,20 @@ void initBLE()
     pCharacteristic->setValue("LOL");
     pCharacteristic->setCallbacks(&chrCallbacks);
 
-    printMS("-- Server, Service and Characteristic have been set up");
+    Serial.println("-- Server, Service and Characteristic have been set up");
 
     pCustomService->start();
-    printMS("-- Service started");
+    Serial.println("-- Service started");
 
     // Start the server (optional but good practice)
     pServer->start();
-    printMS("-- Server started");
+    Serial.println("-- Server started");
 
     NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
+    pAdvertising->setName(BLE_DEVICE_NAME);
     pAdvertising->addServiceUUID(CUSTOM_BLE_SERVICE); // Now it's advertised!
     pAdvertising->start();
-    printMS("-- Advertising started");
+    Serial.println("-- Advertising started");
 }
 
 void updateBLEStatus()

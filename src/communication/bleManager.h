@@ -3,6 +3,8 @@
 
 #include <M5Unified.h>
 #include <NimBLEDevice.h>
+#include "communication/constants.h"
+#include "utils/events.h"
 
 #define BLE_DEVICE_NAME "Hugo's really cool BLE device"
 #define CUSTOM_BLE_SERVICE "1af37de5-470a-469d-a808-634fc1564aad"
@@ -12,6 +14,10 @@ boolean deviceConnected();
 void initBLE();
 void updateBLEStatus();
 void stopBLE();
+
+void setBleConnexionStatus(ConnexionStatus sts);
+ConnexionStatus getBleConnexionStatus();
+extern Signal<ConnexionStatus> bleConnStatusUpdated;
 
 extern NimBLEServer *pServer;
 

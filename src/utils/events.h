@@ -40,7 +40,12 @@ public:
             }
         }
 
-        bool isValid() const { return signal != nullptr; }
+        bool isValid() const
+        {
+            if (signal == nullptr)
+                return false;
+            return signal->isConnected(id);
+        }
     };
 
     Handle connect(std::function<void(Args...)> func)
@@ -48,6 +53,16 @@ public:
         size_t id = nextId++;
         connexions.push_back({id, func});
         return Handle(id, this);
+    }
+
+    bool isConnected(size_t id) const
+    {
+        for (const auto &conn : connexions)
+        {
+            if (conn.id == id)
+                return true;
+        }
+        return false;
     }
 
     void disconnectById(size_t id)

@@ -41,13 +41,14 @@ void State::enter(StateIndex previousState)
 
 void State::exit(State *nextState)
 {
-    // Reset, disable and clear all buttons
+    // Reset, disable and clear all buttons plus disconnect all signals
     for (int i = 0; i < buttonCount; i++)
     {
         if (buttons[i] != nullptr)
         {
             buttons[i]->reset();
             buttons[i]->setClickable(false);
+            buttons[i]->onPressed.disconnectAll();
         }
     }
     // clear buttons only removes the pointer in the array. The buttons are still in memory
@@ -180,11 +181,7 @@ void StateMenu::exit(State *nextState)
         break;
     }
 
-    // disconnect handles
-    onBtnNextPressHdl.disconnect();
-    onBtnPreviousHdl.disconnect();
-
-    // call parent exit() which reset, disable and clear all buttons
+    // call parent exit() which reset, disable and clear all buttons and disconnect signals
     State::exit(nextState);
 }
 
