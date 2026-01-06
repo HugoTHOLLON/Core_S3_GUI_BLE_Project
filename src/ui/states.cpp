@@ -6,64 +6,64 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-State::State() : buttonCount(0)
+State::State() : areaCount(0)
 {
     for (int i = 0; i < 10; i++)
-        buttons[i] = nullptr;
+        clickableAreas[i] = nullptr;
 }
 
-void State::addButton(Button *btn)
+void State::addArea(ClickableArea *area)
 {
-    if (buttonCount < 10)
-        buttons[buttonCount++] = btn;
+    if (areaCount < 10)
+        clickableAreas[areaCount++] = area;
 }
 
-void State::clearButtons()
+void State::clearAreas()
 {
-    buttonCount = 0;
+    areaCount = 0;
     for (int i = 0; i < 10; i++)
-        buttons[i] = nullptr;
+        clickableAreas[i] = nullptr;
 }
 
 void State::enter(StateIndex previousState)
 {
     this->index = StateIndex::Same;
-    // Reset and draw all buttons
-    for (int i = 0; i < buttonCount; i++)
+    // Reset and draw all clickableAreas
+    for (int i = 0; i < areaCount; i++)
     {
-        if (buttons[i] != nullptr)
+        if (clickableAreas[i] != nullptr)
         {
-            buttons[i]->reset();
-            buttons[i]->draw();
+            clickableAreas[i]->reset();
+            clickableAreas[i]->draw();
         }
     }
 }
 
 void State::exit(State *nextState)
 {
-    // Reset, disable and clear all buttons plus disconnect all signals
-    for (int i = 0; i < buttonCount; i++)
+    // Reset, disable and clear all clickableAreas plus disconnect all signals
+    for (int i = 0; i < areaCount; i++)
     {
-        if (buttons[i] != nullptr)
+        if (clickableAreas[i] != nullptr)
         {
-            buttons[i]->reset();
-            buttons[i]->setClickable(false);
-            buttons[i]->onPressed.disconnectAll();
+            clickableAreas[i]->reset();
+            clickableAreas[i]->setClickable(false);
+            clickableAreas[i]->onPressed.disconnectAll();
         }
     }
-    // clear buttons only removes the pointer in the array. The buttons are still in memory
-    clearButtons();
+    // clear clickableAreas only removes the pointer in the array. The clickableAreas are still in memory
+    clearAreas();
 }
 
 void State::checkIfElementPressed(m5::touch_detail_t clickDetails)
 {
-    // Check all registered buttons
-    for (int i = 0; i < buttonCount; i++)
+    // Check all registered clickableAreas
+    for (int i = 0; i < areaCount; i++)
     {
-        if (buttons[i] != nullptr && buttons[i]->isInsideArea(clickDetails.x, clickDetails.y))
+        if (clickableAreas[i] != nullptr && clickableAreas[i]->isInsideArea(clickDetails.x, clickDetails.y))
         {
             // If the button is pressed leave because only one button can be pressed at a time
-            if (buttons[i]->pressButton())
+            if (clickableAreas[i]->press())
                 return;
         }
     }
@@ -78,12 +78,12 @@ StateIndex State::update()
         return index;
     }
 
-    // Update all buttons
-    for (int i = 0; i < buttonCount; i++)
+    // Update all clickableAreas
+    for (int i = 0; i < areaCount; i++)
     {
-        if (buttons[i] != nullptr)
+        if (clickableAreas[i] != nullptr)
         {
-            buttons[i]->update();
+            clickableAreas[i]->update();
         }
     }
 
@@ -125,18 +125,37 @@ void StatePopup::enter(StateIndex previousState)
     {
     case YesOrNo:
         buttonYes.x = 180;
-        this->addButton(&buttonYes);
-        this->addButton(&buttonNo);
+        this->addArea(&buttonYes);
+        this->addArea(&buttonNo);
+        if (!onBtnYesPressHdl.isValid())
+            onBtnYesPressHdl = buttonYes.onPressed.connect([this]()
+                                                           { onButtonYesPressed(); });
+        if (!onBtnNoHdl.isValid())
+            onBtnNoHdl = buttonNo.onPressed.connect([this]()
+                                                    { onButtonNoPressed(); });
         break;
 
     case Confirmation:
     default:
         buttonYes.x = (M5.Display.width() / 2) - (buttonYes.width / 2);
-        this->addButton(&buttonYes);
+        this->addArea(&buttonYes);
+        if (!onBtnYesPressHdl.isValid())
+            onBtnYesPressHdl = buttonYes.onPressed.connect([this]()
+                                                           { onButtonYesPressed(); });
         break;
     }
-    // call parent enter() which set the index to Same and reset and draw the buttons
+    // call parent enter() which set the index to Same and reset and draw the clickableAreas
     State::enter(previousState);
+}
+
+void StatePopup::onButtonYesPressed()
+{
+    this->index = this->previousState;
+}
+
+void StatePopup::onButtonNoPressed()
+{
+    this->index = this->previousState;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -146,24 +165,27 @@ void StatePopup::enter(StateIndex previousState)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StateMenu::StateMenu()
-    : buttonPrevious(15, 185, 130, 40, "Previous"),
-      buttonNext(170, 185, 130, 40, "Next")
+    : buttonPrevious(15, 190, 130, 40, "Previous", 1.6),
+      buttonNext(170, 190, 130, 40, "Next", 1.6),
+      iconBLEApp(20, 63, 90, 90, "BLE", DrawableIcon::BLE)
 {
     stateType = StateIndex::Menu;
 }
 
 void StateMenu::enter(StateIndex previousState)
 {
-    // setup buttons
-    this->addButton(&buttonPrevious);
-    this->addButton(&buttonNext);
+    // setup clickableAreas
+    this->addArea(&iconBLEApp);
+    this->addArea(&buttonPrevious);
+    this->addArea(&buttonNext);
     if (!onBtnNextPressHdl.isValid())
         onBtnNextPressHdl = buttonNext.onPressed.connect([this]()
                                                          { onButtonNextPressed(); });
     if (!onBtnPreviousHdl.isValid())
         onBtnPreviousHdl = buttonPrevious.onPressed.connect([this]()
                                                             { onButtonPreviousPressed(); });
-    // call parent enter() which set the index to Same and reset and draw the buttons
+
+    // call parent enter() which set the index to Same and reset and draw the clickableAreas
     State::enter(previousState);
 }
 
@@ -181,7 +203,7 @@ void StateMenu::exit(State *nextState)
         break;
     }
 
-    // call parent exit() which reset, disable and clear all buttons and disconnect signals
+    // call parent exit() which reset, disable and clear all clickableAreas and disconnect signals
     State::exit(nextState);
 }
 

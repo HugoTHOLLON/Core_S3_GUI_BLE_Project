@@ -1,5 +1,11 @@
 #include "elements.h"
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Clickable Area ///////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
 ClickableArea::ClickableArea(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     this->x = x;
@@ -17,6 +23,39 @@ bool ClickableArea::isInsideArea(int32_t x, int32_t y)
 
 void ClickableArea::update() {}
 
+void ClickableArea::draw() {}
+
+bool ClickableArea::press()
+{
+    if (isClickable())
+    {
+        Serial.println("ClickableArea pressed");
+        this->pressed = true;
+        this->draw();
+        this->onPressed.emit();
+        return true;
+    }
+    return false;
+}
+
+bool ClickableArea::isPressed() const { return pressed; }
+
+bool ClickableArea::isClickable() const { return !pressed && clickable; }
+
+void ClickableArea::setClickable(bool clickable) { this->clickable = clickable; }
+
+void ClickableArea::reset()
+{
+    clickable = true;
+    pressed = false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// Button ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
 Button::Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *label)
     : Button(x, y, width, height, label, 1.7)
 {
@@ -31,30 +70,16 @@ Button::Button(int32_t x, int32_t y, int32_t width, int32_t height, const char *
     this->labelSize = lblSize;
 }
 
-bool Button::pressButton()
+bool Button::press()
 {
-    if (isClickable())
+    // call parent press()
+    if (ClickableArea::press())
     {
         Serial.println(("Button " + String(this->label) + " pressed").c_str());
-        this->pressed = true;
         this->pressedTime = millis();
-        this->draw();
-        this->onPressed.emit();
         return true;
     }
     return false;
-}
-
-bool Button::isPressed() const { return pressed; }
-
-bool Button::isClickable() const { return !pressed && clickable; }
-
-void Button::setClickable(bool clickable) { this->clickable = clickable; }
-
-void Button::reset()
-{
-    clickable = true;
-    pressed = false;
 }
 
 void Button::draw()
@@ -85,5 +110,64 @@ void Button::update()
     {
         pressed = false;
         draw();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////// Icon ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+Icon::Icon(int32_t x, int32_t y, int32_t width, int32_t height, const char *label)
+    : Icon(x, y, width, height, label, DrawableIcon::NOTHING)
+{
+}
+
+Icon::Icon(int32_t x, int32_t y, int32_t width, int32_t height, const char *label, DrawableIcon icon)
+    : ClickableArea(x, y, width, height)
+{
+    clickable = true;
+    pressed = false;
+    this->label = label;
+    this->icon = icon;
+}
+
+bool Icon::press()
+{
+    // call parent press()
+    if (ClickableArea::press())
+    {
+        Serial.println(("Icon " + String(this->label) + " pressed").c_str());
+        this->pressedTime = millis();
+        return true;
+    }
+    return false;
+}
+
+void Icon::draw()
+{
+    if (pressed)
+        M5.Display.fillRect(x, y, width, height, APP_ICON_PRESSED_BG_COLOR);
+    else
+        M5.Display.fillRect(x, y, width, height, APP_ICON_BG_COLOR);
+
+    textdatum_t previousDatum = M5.Display.getTextDatum();
+    M5.Display.setTextDatum(BC_DATUM);
+    M5.Display.setTextSize(1.6);
+    M5.Display.setTextColor(TEXT_COLOR);
+    M5.Display.drawString(label, x + (width / 2), y + height - 5);
+    drawIcon(this->icon, x + 3, y + 7, width - 6, height - 15 - M5.Display.fontHeight());
+
+    M5.Display.setTextDatum(previousDatum);
+}
+
+void Icon::update()
+{
+    // 300 ms
+    if (isPressed() && (millis() - pressedTime >= 300))
+    {
+        pressed = false;
+        this->draw();
     }
 }

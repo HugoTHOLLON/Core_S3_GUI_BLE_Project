@@ -22,16 +22,16 @@ inline StateIndex indexToState(int i) { return (i >= 0 && i < static_cast<int>(S
 class State
 {
 protected:
-    // all of the buttons used by the state
-    // /!\ the order in which the buttons are added matters: in case of a click if 2 buttons are
+    // all of the clickable areas used by the state /!\ the order in which
+    // the clickable areas are added matters: in case of a click if 2 areas are
     // overlapping, the one with the smallest index will be chosen first/!\.
-    Button *buttons[10];
-    Signal<>::Handle *btnsPressedHandle[10];
-    int buttonCount;
+    ClickableArea *clickableAreas[15];
+    Signal<>::Handle *btnsPressedHandle[15];
+    int areaCount;
     StateIndex index;
 
-    void addButton(Button *btn);
-    void clearButtons();
+    void addArea(ClickableArea *area);
+    void clearAreas();
 
     StateIndex stateType;
 
@@ -52,6 +52,10 @@ private:
     StateIndex previousState;
     Button buttonYes;
     Button buttonNo;
+    Signal<>::Handle onBtnYesPressHdl;
+    Signal<>::Handle onBtnNoHdl;
+    void onButtonYesPressed();
+    void onButtonNoPressed();
 
 public:
     enum PopupType
@@ -73,6 +77,7 @@ class StateMenu : public State
 private:
     Button buttonNext;
     Button buttonPrevious;
+    Icon iconBLEApp;
     Signal<>::Handle onBtnNextPressHdl;
     Signal<>::Handle onBtnPreviousHdl;
     void onButtonNextPressed();

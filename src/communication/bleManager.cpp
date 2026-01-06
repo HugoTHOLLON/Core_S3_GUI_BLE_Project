@@ -157,7 +157,7 @@ void initBLE()
 
     NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
     pAdvertising->setName(BLE_DEVICE_NAME);
-    pAdvertising->addServiceUUID(CUSTOM_BLE_SERVICE); // Now it's advertised!
+    pAdvertising->addServiceUUID(CUSTOM_BLE_SERVICE);
     pAdvertising->start();
     Serial.println("-- Advertising started");
 }
