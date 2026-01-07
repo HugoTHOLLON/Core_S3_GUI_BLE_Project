@@ -50,6 +50,7 @@ class StatePopup : public State
 {
 private:
     StateIndex previousState;
+
     Button buttonYes;
     Button buttonNo;
     Signal<>::Handle onBtnYesPressHdl;
@@ -78,6 +79,8 @@ private:
     Button buttonNext;
     Button buttonPrevious;
     Icon iconBLEApp;
+    Icon iconWifiApp;
+    Icon iconMQTTApp;
     Signal<>::Handle onBtnNextPressHdl;
     Signal<>::Handle onBtnPreviousHdl;
     void onButtonNextPressed();

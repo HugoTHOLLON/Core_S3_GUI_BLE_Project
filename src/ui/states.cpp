@@ -167,7 +167,9 @@ void StatePopup::onButtonNoPressed()
 StateMenu::StateMenu()
     : buttonPrevious(15, 190, 130, 40, "Previous", 1.6),
       buttonNext(170, 190, 130, 40, "Next", 1.6),
-      iconBLEApp(20, 63, 90, 90, "BLE", DrawableIcon::BLE)
+      iconBLEApp(15, 63, 90, 90, "BLE", DrawableIcon::BLE),
+      iconWifiApp(115, 63, 90, 90, "Wifi", DrawableIcon::WIFI),
+      iconMQTTApp(215, 63, 90, 90, "MQTT", DrawableIcon::MQTT)
 {
     stateType = StateIndex::Menu;
 }
@@ -176,6 +178,8 @@ void StateMenu::enter(StateIndex previousState)
 {
     // setup clickableAreas
     this->addArea(&iconBLEApp);
+    this->addArea(&iconWifiApp);
+    this->addArea(&iconMQTTApp);
     this->addArea(&buttonPrevious);
     this->addArea(&buttonNext);
     if (!onBtnNextPressHdl.isValid())

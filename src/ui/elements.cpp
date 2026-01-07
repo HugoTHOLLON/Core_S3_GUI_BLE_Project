@@ -17,7 +17,7 @@ ClickableArea::ClickableArea(int32_t x, int32_t y, int32_t width, int32_t height
 bool ClickableArea::isInsideArea(int32_t x, int32_t y)
 {
     // area generosity (bigger hitbox to take into accounts clicks really close to area but not exactly in it)
-    static const int8_t gry = 40;
+    static const int8_t gry = 10;
     return x > (this->x - gry) && y > (this->y - gry) && x < (this->x + this->width + gry) && y < (this->y + this->height + gry);
 }
 

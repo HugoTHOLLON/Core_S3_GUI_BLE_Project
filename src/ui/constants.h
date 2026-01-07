@@ -17,6 +17,8 @@ const int BUTTON_BG_COLOR = BLACK;
 const int APP_ICON_BG_COLOR = 0xE71C; // really light lightgray
 const int APP_ICON_PRESSED_BG_COLOR = DARKGREY;
 
+const int MQTT_VIOLET = VIOLET;
+
 const int CONNECTED_STATUS_COLOR = GREEN;
 const int PENDING_STATUS_COLOR = ORANGE;
 const int DISCONNECTED_STATUS_COLOR = RED;
