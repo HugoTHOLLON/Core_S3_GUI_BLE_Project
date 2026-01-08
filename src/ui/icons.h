@@ -9,7 +9,8 @@ enum class DrawableIcon
     NOTHING,
     BLE,
     WIFI,
-    MQTT
+    MQTT,
+    HOME
 };
 
 void drawIcon(DrawableIcon icon, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight);

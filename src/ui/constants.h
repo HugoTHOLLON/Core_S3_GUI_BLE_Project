@@ -16,6 +16,7 @@ const int BUTTON_BG_COLOR = BLACK;
 
 const int APP_ICON_BG_COLOR = 0xE71C; // really light lightgray
 const int APP_ICON_PRESSED_BG_COLOR = DARKGREY;
+const int ICON_COLOR = BLACK;
 
 const int MQTT_VIOLET = VIOLET;
 

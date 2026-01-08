@@ -165,11 +165,9 @@ void StatePopup::onButtonNoPressed()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StateMenu::StateMenu()
-    : buttonPrevious(15, 190, 130, 40, "Previous", 1.6),
-      buttonNext(170, 190, 130, 40, "Next", 1.6),
-      iconBLEApp(15, 63, 90, 90, "BLE", DrawableIcon::BLE),
-      iconWifiApp(115, 63, 90, 90, "Wifi", DrawableIcon::WIFI),
-      iconMQTTApp(215, 63, 90, 90, "MQTT", DrawableIcon::MQTT)
+    : iconBLEApp(15, 80, 90, 90, "BLE", DrawableIcon::BLE),
+      iconWifiApp(115, 80, 90, 90, "Wifi", DrawableIcon::WIFI),
+      iconMQTTApp(215, 80, 90, 90, "MQTT", DrawableIcon::MQTT)
 {
     stateType = StateIndex::Menu;
 }
@@ -180,14 +178,10 @@ void StateMenu::enter(StateIndex previousState)
     this->addArea(&iconBLEApp);
     this->addArea(&iconWifiApp);
     this->addArea(&iconMQTTApp);
-    this->addArea(&buttonPrevious);
-    this->addArea(&buttonNext);
-    if (!onBtnNextPressHdl.isValid())
-        onBtnNextPressHdl = buttonNext.onPressed.connect([this]()
-                                                         { onButtonNextPressed(); });
-    if (!onBtnPreviousHdl.isValid())
-        onBtnPreviousHdl = buttonPrevious.onPressed.connect([this]()
-                                                            { onButtonPreviousPressed(); });
+
+    if (!onIconBLEPressedHdl.isValid())
+        onIconBLEPressedHdl = iconBLEApp.onPressed.connect([this]()
+                                                           { onIconBLEPressed(); });
 
     // call parent enter() which set the index to Same and reset and draw the clickableAreas
     State::enter(previousState);
@@ -211,12 +205,9 @@ void StateMenu::exit(State *nextState)
     State::exit(nextState);
 }
 
-void StateMenu::onButtonNextPressed()
+void StateMenu::onIconBLEPressed()
 {
-}
-
-void StateMenu::onButtonPreviousPressed()
-{
+    this->index = StateIndex::App;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -226,5 +217,65 @@ void StateMenu::onButtonPreviousPressed()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StateApp::StateApp()
+    : iconHome(5, 25, 60, 50, "Home", DrawableIcon::HOME),
+      buttonPrev(15, 190, 130, 40, "Previous", 1.6),
+      buttonNext(170, 190, 130, 40, "Next", 1.6),
+      appBLE(),
+      appWIFI(),
+      appMQTT()
 {
+    stateType = StateIndex::App;
+    this->currentApp = &appBLE;
+}
+
+void StateApp::setApp(AppID id)
+{
+    switch (id)
+    {
+    case AppID::BLE:
+        currentApp = &appBLE;
+        break;
+    case AppID::WIFI:
+        currentApp = &appWIFI;
+        break;
+    case AppID::MQTT:
+        currentApp = &appMQTT;
+        break;
+    }
+}
+
+void StateApp::enter(StateIndex previousState)
+{
+    this->addArea(&buttonPrev);
+    this->addArea(&buttonNext);
+    this->addArea(&iconHome);
+
+    if (!onIconHomePressHdl.isValid())
+        onIconHomePressHdl = iconHome.onPressed.connect([this]()
+                                                        { onIconHomePressed(); });
+    if (!onBtnNextPressHdl.isValid())
+        onBtnNextPressHdl = buttonNext.onPressed.connect([this]()
+                                                         { onButtonNextPressed(); });
+    if (!onBtnPrevPressHdl.isValid())
+        onBtnPrevPressHdl = buttonPrev.onPressed.connect([this]()
+                                                         { onButtonPrevPressed(); });
+
+    State::enter(previousState);
+
+    currentApp->draw();
+}
+
+void StateApp::onIconHomePressed()
+{
+    this->index = StateIndex::Menu;
+}
+
+void StateApp::onButtonNextPressed()
+{
+    currentApp->nextPage();
+}
+
+void StateApp::onButtonPrevPressed()
+{
+    currentApp->previousPage();
 }

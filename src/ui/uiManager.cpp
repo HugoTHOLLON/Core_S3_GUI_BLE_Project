@@ -137,4 +137,5 @@ void changeState(StateIndex idx)
     states[oldState]->exit(states[currentStateIndex]);
     M5.Display.fillScreen(BG_COLOR);
     states[currentStateIndex]->enter(indexToState(oldState));
+    drawStatusBar(ConnexionStatus::DISCONNECTED, getBleConnexionStatus(), ConnexionStatus::PENDING);
 }

@@ -3,6 +3,7 @@
 
 #include <M5Unified.h>
 #include "ui/constants.h"
+#include "ui/apps.h"
 #include "elements.h"
 #include "utils/events.h"
 
@@ -76,15 +77,11 @@ public:
 class StateMenu : public State
 {
 private:
-    Button buttonNext;
-    Button buttonPrevious;
     Icon iconBLEApp;
     Icon iconWifiApp;
     Icon iconMQTTApp;
-    Signal<>::Handle onBtnNextPressHdl;
-    Signal<>::Handle onBtnPreviousHdl;
-    void onButtonNextPressed();
-    void onButtonPreviousPressed();
+    Signal<>::Handle onIconBLEPressedHdl;
+    void onIconBLEPressed();
 
 public:
     StateMenu();
@@ -94,8 +91,26 @@ public:
 
 class StateApp : public State
 {
+private:
+    AppBLE appBLE;
+    AppWIFI appWIFI;
+    AppMQTT appMQTT;
+    App *currentApp;
+
+    Icon iconHome;
+    Button buttonNext;
+    Button buttonPrev;
+    Signal<>::Handle onIconHomePressHdl;
+    Signal<>::Handle onBtnNextPressHdl;
+    Signal<>::Handle onBtnPrevPressHdl;
+    void onIconHomePressed();
+    void onButtonNextPressed();
+    void onButtonPrevPressed();
+
 public:
     StateApp();
+    void enter(StateIndex previousState) override;
+    void setApp(AppID id);
 };
 
 #endif
