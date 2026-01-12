@@ -7,13 +7,16 @@
 #include "ui/constants.h"
 #include "states.h"
 
-// declare variables (they still need to be defined in uiManager.cpp)
-extern State *states[3]; // Tableau de pointeurs
-extern int currentStateIndex;
+namespace UIManager
+{
+    // declare variables (they still need to be defined in uiManager.cpp)
+    extern State *states[3]; // Tableau de pointeurs
+    extern int currentStateIndex;
 
-void uiSetup();
-void uiLoop();
-void changeState(StateIndex idx);
-State *getState(StateIndex stateIdx);
+    void uiSetup();
+    void uiLoop();
+    void changeState(StateIndex idx);
+    State *getState(StateIndex stateIdx);
+}
 
 #endif

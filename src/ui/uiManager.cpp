@@ -90,23 +90,26 @@ void onMQTTConnexionStatusUpdated(ConnexionStatus mqttStatus)
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-State *states[3]; // Tableau de pointeurs
-int currentStateIndex;
-
-State *getState(StateIndex stateIdx)
+namespace UIManager
 {
-    return states[index(stateIdx)];
-}
+    State *states[3]; // Tableau de pointeurs
+    int currentStateIndex;
 
-void changeState(StateIndex idx)
-{
-    Serial.println("Changing state");
-    int oldState = currentStateIndex;
-    currentStateIndex = index(idx);
-    states[oldState]->exit(states[currentStateIndex]);
-    M5.Display.fillScreen(BG_COLOR);
-    states[currentStateIndex]->enter(indexToState(oldState));
-    drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
+    State *getState(StateIndex stateIdx)
+    {
+        return states[index(stateIdx)];
+    }
+
+    void changeState(StateIndex idx)
+    {
+        Serial.println("Changing state");
+        int oldState = currentStateIndex;
+        currentStateIndex = index(idx);
+        states[oldState]->exit(states[currentStateIndex]);
+        M5.Display.fillScreen(BG_COLOR);
+        states[currentStateIndex]->enter(indexToState(oldState));
+        drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -117,37 +120,40 @@ void changeState(StateIndex idx)
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void uiSetup()
+namespace UIManager
 {
-    Serial.println("-------- UI Setup started");
-    states[index(StateIndex::Menu)] = new StateMenu();
-    states[index(StateIndex::Popup)] = new StatePopup();
-    states[index(StateIndex::App)] = new StateApp();
-    currentStateIndex = index(StateIndex::Menu);
-
-    Serial.println("-------- UI drawing status bar");
-    drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
-
-    Serial.println("-------- UI connecting connexion status updated signals");
-    BLEManager::connStatusUpdated.connect(onBLEConnexionStatusUpdated);
-
-    Serial.println("-------- UI entering state Menu");
-    states[currentStateIndex]->enter(StateIndex::Same);
-}
-
-void uiLoop()
-{
-    M5.update();
-    auto t = M5.Touch.getDetail();
-    if (t.wasPressed())
+    void uiSetup()
     {
-        states[currentStateIndex]->checkIfElementPressed(t);
+        Serial.println("-------- UI Setup started");
+        states[index(StateIndex::Menu)] = new StateMenu();
+        states[index(StateIndex::Popup)] = new StatePopup();
+        states[index(StateIndex::App)] = new StateApp();
+        currentStateIndex = index(StateIndex::Menu);
+
+        Serial.println("-------- UI drawing status bar");
+        drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
+
+        Serial.println("-------- UI connecting connexion status updated signals");
+        BLEManager::connStatusUpdated.connect(onBLEConnexionStatusUpdated);
+
+        Serial.println("-------- UI entering state Menu");
+        states[currentStateIndex]->enter(StateIndex::Same);
     }
-    // update various elements
-    StateIndex idx = states[currentStateIndex]->update();
-    if (idx != StateIndex::Same)
+
+    void uiLoop()
     {
-        Serial.print("StateIndex different - ");
-        changeState(idx);
+        M5.update();
+        auto t = M5.Touch.getDetail();
+        if (t.wasPressed())
+        {
+            states[currentStateIndex]->checkIfElementPressed(t);
+        }
+        // update various elements
+        StateIndex idx = states[currentStateIndex]->update();
+        if (idx != StateIndex::Same)
+        {
+            Serial.print("StateIndex different - ");
+            changeState(idx);
+        }
     }
 }

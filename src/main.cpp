@@ -54,13 +54,13 @@ void setup()
   ///////////////////////////////////////////////////////
 
   BLEManager::init();
-  uiSetup();
+  UIManager::uiSetup();
 }
 
 void loop()
 {
-  // BLEManager::update();
-  uiLoop();
+  BLEManager::update();
+  UIManager::uiLoop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
