@@ -103,23 +103,41 @@ StatePopup::StatePopup()
     stateType = StateIndex::Popup;
 }
 
-void StatePopup::enter(StateIndex previousState)
+void StatePopup::setPopup(PopupType type, const char *title, const char *msg)
 {
-    this->previousState = previousState;
-    // drawing state borders
+    this->type = type;
+    this->title = title;
+    this->msg = msg;
+}
+
+void StatePopup::draw()
+{
+    // setup variables
     int32_t width = M5.Display.width() - 20;
     int32_t height = M5.Display.height() - 20 - statusBarHeight;
     int32_t y = statusBarHeight + 10;
 
+    // drawing state borders
     M5.Display.fillRect(7, y - 3, width + 6, height + 6, BUTTON_BG_COLOR);
     M5.Display.fillRect(10, y, width, height, BG_COLOR);
 
+    // draw title
     int32_t textX = M5.Display.width() / 2;
     M5.Display.setTextSize(2);
     M5.Display.drawCenterString(this->title, textX, y + 10);
+
+    // draw message
     int32_t msgY = y + M5.Display.fontHeight() + 20;
     M5.Display.setTextSize(1.6);
     M5.Display.drawCenterString(this->msg, textX, msgY);
+}
+
+void StatePopup::enter(StateIndex previousState)
+{
+    this->previousState = previousState;
+
+    this->draw();
+
     // button setup
     switch (this->type)
     {
@@ -143,20 +161,20 @@ void StatePopup::enter(StateIndex previousState)
             onBtnYesPressHdl = buttonYes.onPressed.connect([this]()
                                                            { onButtonYesPressed(); });
         break;
+        this->type = type;
+        this->title = title;
+        this->msg = msg;
     }
+
     // call parent enter() which set the index to Same and reset and draw the clickableAreas
     State::enter(previousState);
 }
 
-void StatePopup::onButtonYesPressed()
-{
-    this->index = this->previousState;
-}
+void StatePopup::onButtonYesPressed() { this->index = this->previousState; }
+void StatePopup::onButtonNoPressed() { this->index = this->previousState; }
 
-void StatePopup::onButtonNoPressed()
-{
-    this->index = this->previousState;
-}
+Button StatePopup::getButtonYes() { return this->buttonYes; }
+Button StatePopup::getButtonNo() { return this->buttonNo; }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +223,11 @@ void StateMenu::exit(State *nextState)
     State::exit(nextState);
 }
 
-void StateMenu::onIconBLEPressed()
-{
-    this->index = StateIndex::App;
-}
+void StateMenu::onIconBLEPressed() { this->index = StateIndex::App; }
+
+Icon StateMenu::getIconBLEApp() { return this->iconBLEApp; }
+Icon StateMenu::getIconWifiApp() { return this->iconWifiApp; }
+Icon StateMenu::getIconMQTTApp() { return this->iconMQTTApp; }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -265,17 +284,10 @@ void StateApp::enter(StateIndex previousState)
     currentApp->draw();
 }
 
-void StateApp::onIconHomePressed()
-{
-    this->index = StateIndex::Menu;
-}
+void StateApp::onIconHomePressed() { this->index = StateIndex::Menu; }
+void StateApp::onButtonNextPressed() { currentApp->nextPage(); }
+void StateApp::onButtonPrevPressed() { currentApp->previousPage(); }
 
-void StateApp::onButtonNextPressed()
-{
-    currentApp->nextPage();
-}
-
-void StateApp::onButtonPrevPressed()
-{
-    currentApp->previousPage();
-}
+Icon StateApp::getIconHome() { return this->iconHome; }
+Button StateApp::getButtonNext() { return this->buttonNext; }
+Button StateApp::getButtonPrev() { return this->buttonPrev; }

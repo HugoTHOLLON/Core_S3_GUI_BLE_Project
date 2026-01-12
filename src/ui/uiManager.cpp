@@ -85,14 +85,37 @@ void onMQTTConnexionStatusUpdated(ConnexionStatus mqttStatus)
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// Setup and Loop ////////////////////////////////////
+/////////////////////////////////// States Management /////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-State *states[10]; // Tableau de pointeurs
+State *states[3]; // Tableau de pointeurs
 int currentStateIndex;
-int stateCount;
+
+State *getState(StateIndex stateIdx)
+{
+    return states[index(stateIdx)];
+}
+
+void changeState(StateIndex idx)
+{
+    Serial.println("Changing state");
+    int oldState = currentStateIndex;
+    currentStateIndex = index(idx);
+    states[oldState]->exit(states[currentStateIndex]);
+    M5.Display.fillScreen(BG_COLOR);
+    states[currentStateIndex]->enter(indexToState(oldState));
+    drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// Setup and Loop ////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 void uiSetup()
 {
@@ -103,10 +126,10 @@ void uiSetup()
     currentStateIndex = index(StateIndex::Menu);
 
     Serial.println("-------- UI drawing status bar");
-    drawStatusBar(ConnexionStatus::DISCONNECTED, getBleConnexionStatus(), ConnexionStatus::PENDING);
+    drawStatusBar(ConnexionStatus::DISCONNECTED, BLEManager::getConnexionStatus(), ConnexionStatus::PENDING);
 
     Serial.println("-------- UI connecting connexion status updated signals");
-    bleConnStatusUpdated.connect(onBLEConnexionStatusUpdated);
+    BLEManager::connStatusUpdated.connect(onBLEConnexionStatusUpdated);
 
     Serial.println("-------- UI entering state Menu");
     states[currentStateIndex]->enter(StateIndex::Same);
@@ -127,15 +150,4 @@ void uiLoop()
         Serial.print("StateIndex different - ");
         changeState(idx);
     }
-}
-
-void changeState(StateIndex idx)
-{
-    Serial.println("Changing state");
-    int oldState = currentStateIndex;
-    currentStateIndex = index(idx);
-    states[oldState]->exit(states[currentStateIndex]);
-    M5.Display.fillScreen(BG_COLOR);
-    states[currentStateIndex]->enter(indexToState(oldState));
-    drawStatusBar(ConnexionStatus::DISCONNECTED, getBleConnexionStatus(), ConnexionStatus::PENDING);
 }

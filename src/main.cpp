@@ -53,13 +53,13 @@ void setup()
   ///////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////
 
-  initBLE();
+  BLEManager::init();
   uiSetup();
 }
 
 void loop()
 {
-  // updateBLEStatus();
+  // BLEManager::update();
   uiLoop();
 }
 

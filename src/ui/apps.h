@@ -4,6 +4,7 @@
 #include <M5Unified.h>
 #include "elements.h"
 #include "utils/events.h"
+#include "communication/bleManager.h"
 
 enum class AppID
 {

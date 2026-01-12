@@ -10,15 +10,13 @@
 #define CUSTOM_BLE_SERVICE "1af37de5-470a-469d-a808-634fc1564aad"
 #define CUSTOM_BLE_CHARACTERISTIC "ba75132a-eb84-4ff7-9a19-4868384ae0e5"
 
-boolean deviceConnected();
-void initBLE();
-void updateBLEStatus();
-void stopBLE();
+namespace BLEManager
+{
+    extern Signal<ConnexionStatus> connStatusUpdated;
 
-void setBleConnexionStatus(ConnexionStatus sts);
-ConnexionStatus getBleConnexionStatus();
-extern Signal<ConnexionStatus> bleConnStatusUpdated;
-
-extern NimBLEServer *pServer;
-
+    void init();
+    void update();
+    void stop();
+    ConnexionStatus getConnexionStatus();
+}
 #endif

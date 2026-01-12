@@ -47,6 +47,10 @@ public:
     virtual ~State() = default;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 class StatePopup : public State
 {
 private:
@@ -58,6 +62,8 @@ private:
     Signal<>::Handle onBtnNoHdl;
     void onButtonYesPressed();
     void onButtonNoPressed();
+
+    void draw();
 
 public:
     enum PopupType
@@ -71,8 +77,16 @@ public:
     const char *msg = "";
 
     StatePopup();
+    void setPopup(PopupType type, const char *title, const char *msg);
     void enter(StateIndex previousState) override;
+
+    Button getButtonYes();
+    Button getButtonNo();
 };
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 class StateMenu : public State
 {
@@ -87,7 +101,15 @@ public:
     StateMenu();
     void enter(StateIndex previousState) override;
     void exit(State *nextState) override;
+
+    Icon getIconBLEApp();
+    Icon getIconWifiApp();
+    Icon getIconMQTTApp();
 };
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 class StateApp : public State
 {
@@ -111,6 +133,10 @@ public:
     StateApp();
     void enter(StateIndex previousState) override;
     void setApp(AppID id);
+
+    Icon getIconHome();
+    Button getButtonNext();
+    Button getButtonPrev();
 };
 
 #endif
